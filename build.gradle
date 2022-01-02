@@ -1,6 +1,9 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
+
+def ENV = System.getenv()
 
 group 'org.example'
 version '1.0-SNAPSHOT'
@@ -18,4 +21,30 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+// configure the maven publication
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = archivesBaseName
+            version = version
+            groupId = group
+
+            from components.java
+        }
+    }
+
+    // select the repositories you want to publish to
+    repositories {
+        if (ENV.MAVEN_URL) {
+            maven {
+                url ENV.MAVEN_URL
+                credentials {
+                    username ENV.MAVEN_USERNAME
+                    password ENV.MAVEN_PASSWORD
+                }
+            }
+        }
+    }
 }
