@@ -7,15 +7,13 @@ public class Example {
 
     @Test
     void example() {
-        NoiseSampler noiseSampler = new NoiseSampler();
-        noiseSampler.init(1L);
+        NoiseSampler noiseSampler = new NoiseSampler(1L);
         System.out.println(noiseSampler.sampleNoise(NoiseType.TEMPERATURE, 0, 0, 0));
     }
 
     @Test
     void example2() {
-        NoiseSampler noiseSampler = new NoiseSampler();
-        noiseSampler.init(1L);
+        NoiseSampler noiseSampler = new NoiseSampler(1L);
 
         Map<NoiseType, Double> noise = noiseSampler.queryNoise(0, 0, 0, NoiseType.TEMPERATURE, NoiseType.HUMIDITY, NoiseType.EROSION, NoiseType.WEIRDNESS);
 

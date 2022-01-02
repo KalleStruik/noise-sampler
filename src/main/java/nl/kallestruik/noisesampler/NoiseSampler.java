@@ -18,7 +18,7 @@ import nl.kallestruik.noisesampler.minecraft.VanillaTerrainParameters;
 public class NoiseSampler {
     private NoiseColumnSampler noiseColumnSampler;
 
-    public void init(long seed) {
+    public NoiseSampler(long seed) {
         NoiseRegistry noiseRegistry = new NoiseRegistry();
         GenerationShapeConfig generationShapeConfig = new GenerationShapeConfig(-64, 384,
                 new NoiseSamplingConfig(1.0, 1.0, 80.0, 160.0),
