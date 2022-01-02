@@ -3,18 +3,16 @@
  */
 package nl.kallestruik.noisesampler.minecraft;
 
-public record GenerationShapeConfig(int minimumY, int height, NoiseSamplingConfig sampling, SlideConfig topSlide, SlideConfig bottomSlide, int horizontalSize, int verticalSize, boolean islandNoiseOverride, boolean amplified, boolean largeBiomes, VanillaTerrainParameters terrainParameters) {
+import nl.kallestruik.noisesampler.minecraft.util.Util;
+
+public record GenerationShapeConfig(int minimumY, int height, int horizontalSize, int verticalSize, boolean islandNoiseOverride, boolean amplified, boolean largeBiomes, VanillaTerrainParameters terrainParameters) {
 
     public int verticalBlockSize() {
-        return BiomeCoords.toBlock(this.verticalSize());
+        return Util.toBlock(this.verticalSize());
     }
 
     public int horizontalBlockSize() {
-        return BiomeCoords.toBlock(this.horizontalSize());
-    }
-
-    public int verticalBlockCount() {
-        return this.height() / this.verticalBlockSize();
+        return Util.toBlock(this.horizontalSize());
     }
 
     public int minimumBlockY() {

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
-import nl.kallestruik.noisesampler.minecraft.AbstractRandom;
+import nl.kallestruik.noisesampler.minecraft.Xoroshiro128PlusPlusRandom;
 
 public class DoublePerlinNoiseSampler {
     private static final double DOMAIN_SCALE = 1.0181268882175227;
@@ -16,24 +16,11 @@ public class DoublePerlinNoiseSampler {
     private final OctavePerlinNoiseSampler firstSampler;
     private final OctavePerlinNoiseSampler secondSampler;
 
-    @Deprecated
-    public static DoublePerlinNoiseSampler createLegacy(AbstractRandom random, NoiseParameters parameters) {
-        return new DoublePerlinNoiseSampler(random, parameters.getFirstOctave(), parameters.getAmplitudes(), false);
-    }
-
-    public static DoublePerlinNoiseSampler create(AbstractRandom random, int offset, double ... octaves) {
-        return new DoublePerlinNoiseSampler(random, offset, DoubleStream.of(octaves).boxed().collect(Collectors.toList()), true);
-    }
-
-    public static DoublePerlinNoiseSampler create(AbstractRandom random, NoiseParameters parameters) {
+    public static DoublePerlinNoiseSampler create(Xoroshiro128PlusPlusRandom random, NoiseParameters parameters) {
         return new DoublePerlinNoiseSampler(random, parameters.getFirstOctave(), parameters.getAmplitudes(), true);
     }
 
-    public static DoublePerlinNoiseSampler create(AbstractRandom random, int offset, List<Double> octaves) {
-        return new DoublePerlinNoiseSampler(random, offset, octaves, true);
-    }
-
-    private DoublePerlinNoiseSampler(AbstractRandom random, int offset, List<Double> octaves, boolean xoroshiro) {
+    private DoublePerlinNoiseSampler(Xoroshiro128PlusPlusRandom random, int offset, List<Double> octaves, boolean xoroshiro) {
         this.firstSampler = OctavePerlinNoiseSampler.create(random, offset, octaves);
         this.secondSampler = OctavePerlinNoiseSampler.create(random, offset, octaves);
         int j = Integer.MAX_VALUE;
@@ -56,19 +43,6 @@ public class DoublePerlinNoiseSampler {
         double h = y * 1.0181268882175227;
         double i = z * 1.0181268882175227;
         return (this.firstSampler.sample(x, y, z) + this.secondSampler.sample(g, h, i)) * this.amplitude;
-    }
-
-    public NoiseParameters copy() {
-        return new NoiseParameters(this.firstSampler.getFirstOctave(), this.firstSampler.getAmplitudes());
-    }
-
-    public void addDebugInfo(StringBuilder info) {
-        info.append("NormalNoise {");
-        info.append("first: ");
-        this.firstSampler.addDebugInfo(info);
-        info.append(", second: ");
-        this.secondSampler.addDebugInfo(info);
-        info.append("}");
     }
 
     public static class NoiseParameters {

@@ -5,6 +5,6 @@ package nl.kallestruik.noisesampler.minecraft;
 
 @FunctionalInterface
 public interface ToFloatFunction<C> {
-    public float apply(C var1);
+    float apply(C var1);
 }
 

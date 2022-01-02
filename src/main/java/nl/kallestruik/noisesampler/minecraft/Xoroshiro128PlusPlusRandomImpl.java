@@ -7,7 +7,7 @@ public class Xoroshiro128PlusPlusRandomImpl {
     private long seedLo;
     private long seedHi;
 
-    public Xoroshiro128PlusPlusRandomImpl(RandomSeed.XoroshiroSeed seed) {
+    public Xoroshiro128PlusPlusRandomImpl(Xoroshiro128PlusPlusRandom.XoroshiroSeed seed) {
         this(seed.seedLo(), seed.seedHi());
     }
 

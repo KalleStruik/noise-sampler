@@ -4,9 +4,8 @@
 package nl.kallestruik.noisesampler.minecraft.noise;
 
 import java.util.stream.IntStream;
-import nl.kallestruik.noisesampler.minecraft.AbstractRandom;
-import nl.kallestruik.noisesampler.minecraft.MathHelper;
-import nl.kallestruik.noisesampler.minecraft.NoiseSamplingConfig;
+import nl.kallestruik.noisesampler.minecraft.util.MathHelper;
+import nl.kallestruik.noisesampler.minecraft.Xoroshiro128PlusPlusRandom;
 
 public class InterpolatedNoiseSampler {
     private final OctavePerlinNoiseSampler lowerInterpolatedNoise;
@@ -19,20 +18,20 @@ public class InterpolatedNoiseSampler {
     private final int cellWidth;
     private final int cellHeight;
 
-    public InterpolatedNoiseSampler(OctavePerlinNoiseSampler lowerInterpolatedNoise, OctavePerlinNoiseSampler upperInterpolatedNoise, OctavePerlinNoiseSampler interpolationNoise, NoiseSamplingConfig config, int cellWidth, int cellHeight) {
+    public InterpolatedNoiseSampler(OctavePerlinNoiseSampler lowerInterpolatedNoise, OctavePerlinNoiseSampler upperInterpolatedNoise, OctavePerlinNoiseSampler interpolationNoise, int cellWidth, int cellHeight) {
         this.lowerInterpolatedNoise = lowerInterpolatedNoise;
         this.upperInterpolatedNoise = upperInterpolatedNoise;
         this.interpolationNoise = interpolationNoise;
-        this.xzScale = 684.412 * config.getXZScale();
-        this.yScale = 684.412 * config.getYScale();
-        this.xzMainScale = this.xzScale / config.getXZFactor();
-        this.yMainScale = this.yScale / config.getYFactor();
+        this.xzScale = 684.412;
+        this.yScale = 684.412;
+        this.xzMainScale = this.xzScale / 80.0;
+        this.yMainScale = this.yScale / 160.0;
         this.cellWidth = cellWidth;
         this.cellHeight = cellHeight;
     }
 
-    public InterpolatedNoiseSampler(AbstractRandom random, NoiseSamplingConfig config, int cellWidth, int cellHeight) {
-        this(OctavePerlinNoiseSampler.createLegacy(random, IntStream.rangeClosed(-15, 0)), OctavePerlinNoiseSampler.createLegacy(random, IntStream.rangeClosed(-15, 0)), OctavePerlinNoiseSampler.createLegacy(random, IntStream.rangeClosed(-7, 0)), config, cellWidth, cellHeight);
+    public InterpolatedNoiseSampler(Xoroshiro128PlusPlusRandom random, int cellWidth, int cellHeight) {
+        this(OctavePerlinNoiseSampler.createLegacy(random, IntStream.rangeClosed(-15, 0)), OctavePerlinNoiseSampler.createLegacy(random, IntStream.rangeClosed(-15, 0)), OctavePerlinNoiseSampler.createLegacy(random, IntStream.rangeClosed(-7, 0)), cellWidth, cellHeight);
     }
 
     public double calculateNoise(int i, int j, int k) {

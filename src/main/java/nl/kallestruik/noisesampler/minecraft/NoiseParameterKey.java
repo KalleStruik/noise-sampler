@@ -3,8 +3,6 @@
  */
 package nl.kallestruik.noisesampler.minecraft;
 
-import nl.kallestruik.noisesampler.minecraft.noise.DoublePerlinNoiseSampler;
-
 public enum NoiseParameterKey {
     TEMPERATURE("temperature"),
     VEGETATION("vegetation"),
@@ -71,10 +69,6 @@ public enum NoiseParameterKey {
 
     NoiseParameterKey(String value) {
         this.value = value;
-    }
-
-    public static DoublePerlinNoiseSampler createNoiseSampler(NoiseRegistry noiseRegistry, RandomDeriver randomDeriver, NoiseParameterKey noise) {
-        return DoublePerlinNoiseSampler.create(randomDeriver.createRandom(new Identifier("minecraft", noise.value)), noiseRegistry.getOrThrow(noise));
     }
 }
 

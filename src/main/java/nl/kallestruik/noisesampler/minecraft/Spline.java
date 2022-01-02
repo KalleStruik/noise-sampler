@@ -5,54 +5,35 @@ package nl.kallestruik.noisesampler.minecraft;
 
 import java.util.ArrayList;
 import java.util.List;
+import nl.kallestruik.noisesampler.minecraft.util.MathHelper;
 
-public interface Spline<C>
-extends ToFloatFunction<C> {
-    public String getDebugString();
+public interface Spline<C> extends ToFloatFunction<C> {
 
-    public static <C> Spline<C> fixedFloatFunction(float value) {
-        return new FixedFloatFunction(value);
+    static <C> Builder<C> builder(ToFloatFunction<C> locationFunction) {
+        return new Builder<>(locationFunction);
     }
 
-    public static <C> Builder<C> builder(ToFloatFunction<C> locationFunction) {
-        return new Builder<C>(locationFunction);
-    }
-
-    public static <C> Builder<C> builder(ToFloatFunction<C> locationFunction, ToFloatFunction<Float> arg2) {
-        return new Builder<C>(locationFunction, arg2);
-    }
-
-    public record FixedFloatFunction<C>(float value) implements Spline<C>
+    record FixedFloatFunction<C>(float value) implements Spline<C>
     {
         @Override
         public float apply(C object) {
             return this.value;
         }
 
-        @Override
-        public String getDebugString() {
-            return String.format("k=%.3f", Float.valueOf(this.value));
-        }
     }
 
-    public static final class Builder<C> {
+    final class Builder<C> {
         private final ToFloatFunction<C> locationFunction;
-        private final ToFloatFunction<Float> field_35661;
         private final List<Float> locations = new ArrayList<>();
         private final List<Spline<C>> values = new ArrayList<>();
         private final List<Float> derivatives = new ArrayList<>();
 
-        protected Builder(ToFloatFunction<C> locationFunction) {
-            this(locationFunction, float_ -> float_.floatValue());
-        }
-
-        protected Builder(ToFloatFunction<C> locationFunction, ToFloatFunction<Float> arg2) {
+        Builder(ToFloatFunction<C> locationFunction) {
             this.locationFunction = locationFunction;
-            this.field_35661 = arg2;
         }
 
         public Builder<C> add(float location, float value, float derivative) {
-            return this.add(location, new FixedFloatFunction(this.field_35661.apply(Float.valueOf(value))), derivative);
+            return this.add(location, new FixedFloatFunction<>(value), derivative);
         }
 
         public Builder<C> add(float location, Spline<C> value, float derivative) {
@@ -69,11 +50,11 @@ extends ToFloatFunction<C> {
             if (this.locations.isEmpty()) {
                 throw new IllegalStateException("No elements added");
             }
-            return new class_6738<C>(this.locationFunction, this.locations, List.copyOf(this.values), this.derivatives);
+            return new SplineImpl<>(this.locationFunction, this.locations, List.copyOf(this.values), this.derivatives);
         }
     }
 
-    public record class_6738<C>(ToFloatFunction<C> coordinate, List<Float> locations, List<Spline<C>> values, List<Float> derivatives) implements Spline<C>
+    record SplineImpl<C>(ToFloatFunction<C> coordinate, List<Float> locations, List<Spline<C>> values, List<Float> derivatives) implements Spline<C>
     {
         @Override
         public float apply(C object) {
@@ -89,21 +70,15 @@ extends ToFloatFunction<C> {
             float g = this.locations.get(i2);
             float h = this.locations.get(i2 + 1);
             float k = (f - g) / (h - g);
-            ToFloatFunction lv = this.values.get(i2);
-            ToFloatFunction lv2 = this.values.get(i2 + 1);
+            ToFloatFunction<C> lv = this.values.get(i2);
+            ToFloatFunction<C> lv2 = this.values.get(i2 + 1);
             float l = this.derivatives.get(i2);
             float m = this.derivatives.get(i2 + 1);
             float n = lv.apply(object);
             float o = lv2.apply(object);
             float p = l * (h - g) - (o - n);
             float q = -m * (h - g) + (o - n);
-            float r = MathHelper.lerp(k, n, o) + k * (1.0f - k) * MathHelper.lerp(k, p, q);
-            return r;
-        }
-
-        @Override
-        public String getDebugString() {
-            return "";
+            return MathHelper.lerp(k, n, o) + k * (1.0f - k) * MathHelper.lerp(k, p, q);
         }
 
 

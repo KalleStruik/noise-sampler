@@ -5,8 +5,7 @@ import java.util.Map;
 import nl.kallestruik.noisesampler.minecraft.noise.DoublePerlinNoiseSampler;
 
 public class NoiseRegistry {
-    private static final Map<NoiseParameterKey, DoublePerlinNoiseSampler.NoiseParameters> registry = new HashMap<>();
-
+    public static final Map<NoiseParameterKey, DoublePerlinNoiseSampler.NoiseParameters> registry = new HashMap<>();
 
     static {
         NoiseRegistry.register(0, NoiseParameterKey.TEMPERATURE, NoiseParameterKey.VEGETATION, NoiseParameterKey.CONTINENTALNESS, NoiseParameterKey.EROSION);
@@ -74,14 +73,5 @@ public class NoiseRegistry {
 
     private static void register(NoiseParameterKey noise, int firstOctave, double firstAmplitude, double ... amplitudes) {
         registry.put(noise, new DoublePerlinNoiseSampler.NoiseParameters(firstOctave, firstAmplitude, amplitudes));
-    }
-    
-    public DoublePerlinNoiseSampler.NoiseParameters getOrThrow(NoiseParameterKey key) {
-        DoublePerlinNoiseSampler.NoiseParameters result = registry.get(key);
-        if (result == null) {
-            throw new IllegalStateException("Key not in registry.");
-        }
-
-        return result;
     }
 }
