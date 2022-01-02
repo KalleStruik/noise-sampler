@@ -8,7 +8,11 @@ public class Example {
     @Test
     void example() {
         NoiseSampler noiseSampler = new NoiseSampler(1L);
-        System.out.println(noiseSampler.sampleNoise(NoiseType.TEMPERATURE, 0, 0, 0));
+        long start = System.nanoTime();
+        for (int i = 0; i < 8000000; i++) {
+            noiseSampler.sampleNoise(NoiseType.TEMPERATURE, 0, 0, 0);
+        }
+        System.out.println((System.nanoTime() - start) / 1000000000.0);
     }
 
     @Test

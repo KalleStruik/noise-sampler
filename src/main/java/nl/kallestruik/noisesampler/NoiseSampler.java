@@ -147,7 +147,11 @@ public class NoiseSampler {
                 return NoiseHelper.lerpFromProgress(noiseColumnSampler.spaghettiRoughnessModulatorNoise, x, y, z, 0.0, 0.1);
             }
             case CAVE_ENTRANCE -> {
-                return noiseColumnSampler.sampleCaveEntranceNoise(x, y, z);
+                return noiseColumnSampler.sampleCaveEntranceNoise(
+                        BiomeCoords.toBlock(x),
+                        BiomeCoords.toBlock(y),
+                        BiomeCoords.toBlock(z)
+                );
             }
             case CAVE_LAYER -> {
                 // scaling them by 4 because it's sampled in normal coords
