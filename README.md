@@ -12,4 +12,6 @@ implementation 'com.github.KalleStruik:noise-sampler:-SNAPSHOT'
 ```
 
 ## Credits
-Made by jellejurre (discord: @jellejurre#8585) and dragontamerfred (discord: @dragontamerfred#2779)
+Original noise sampling code from [carpet mod](https://github.com/gnembon/fabric-carpet).  
+Original noise implementation from Mojang.  
+Spliced together and optimized by dragontamerfred (discord: @dragontamerfred#2779) jellejurre (discord: @jellejurre#8585)
