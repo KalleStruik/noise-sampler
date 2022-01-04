@@ -262,5 +262,13 @@ public record VanillaTerrainParameters(Spline<NoisePoint> offsetSpline, Spline<N
 
     public record NoisePoint(float continentalnessNoise, float erosionNoise, float normalizedWeirdness, float weirdnessNoise) {
     }
+
+    public static VanillaTerrainParameters createNetherParameters() {
+        return new VanillaTerrainParameters(new Spline.FixedFloatFunction<>(0.0f), new Spline.FixedFloatFunction<>(0.0f), new Spline.FixedFloatFunction<>(0.0f));
+    }
+
+    public static VanillaTerrainParameters createEndParameters() {
+        return new VanillaTerrainParameters(new Spline.FixedFloatFunction<>(0.0f), new Spline.FixedFloatFunction<>(1.0f), new Spline.FixedFloatFunction<>(0.0f));
+    }
 }
 

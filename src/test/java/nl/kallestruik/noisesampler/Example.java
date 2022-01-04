@@ -2,6 +2,7 @@ package nl.kallestruik.noisesampler;
 
 import java.util.HashMap;
 import java.util.Map;
+import nl.kallestruik.noisesampler.minecraft.Dimension;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +12,7 @@ public class Example {
     void example() {
         long start = System.nanoTime();
         for (int i = 0; i < 8000; i++) {
-            NoiseSampler noiseSampler = new NoiseSampler(i);
+            NoiseSampler noiseSampler = new NoiseSampler(i, Dimension.OVERWORLD);
             for (int j = 0; j < 1000; j++) {
                 noiseSampler.queryNoise(j, 0, 0, NoiseType.TEMPERATURE);
             }
@@ -60,9 +61,9 @@ public class Example {
         expected.put(NoiseType.SPAGHETTI_3D_RARITY, 0.27865);
         expected.put(NoiseType.CAVE_CHEESE, 0.52080);
 
-        NoiseSampler noiseSampler = new NoiseSampler(1L);
+        NoiseSampler noiseSampler = new NoiseSampler(1L, Dimension.OVERWORLD);
 
-        Map<NoiseType, Double> noise = noiseSampler.queryNoise(0, 0, 0, NoiseType.values());
+        Map<NoiseType, Double> noise = noiseSampler.queryNoiseFromBlockPos(0, 0, 0, NoiseType.values());
 
         for (Map.Entry<NoiseType, Double> entry : noise.entrySet()) {
             Assertions.assertEquals(expected.get(entry.getKey()), entry.getValue(), 0.00001, "Noise value for " + entry.getKey() + " does not match.");

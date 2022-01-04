@@ -3,10 +3,11 @@
  */
 package nl.kallestruik.noisesampler.minecraft;
 
+import nl.kallestruik.noisesampler.minecraft.util.NoiseSamplingConfig;
+import nl.kallestruik.noisesampler.minecraft.util.SlideConfig;
 import nl.kallestruik.noisesampler.minecraft.util.Util;
 
-public record GenerationShapeConfig(int minimumY, int height, int horizontalSize, int verticalSize, boolean islandNoiseOverride, boolean amplified, boolean largeBiomes, VanillaTerrainParameters terrainParameters) {
-
+public record GenerationShapeConfig(int minimumY, int height, NoiseSamplingConfig sampling, SlideConfig topSlide, SlideConfig bottomSlide, int horizontalSize, int verticalSize, boolean islandNoiseOverride, boolean amplified, boolean largeBiomes, VanillaTerrainParameters terrainParameters) {
     public int verticalBlockSize() {
         return Util.toBlock(this.verticalSize());
     }

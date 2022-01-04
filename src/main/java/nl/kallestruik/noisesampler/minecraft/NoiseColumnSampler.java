@@ -7,6 +7,7 @@
 package nl.kallestruik.noisesampler.minecraft;
 
 import nl.kallestruik.noisesampler.minecraft.noise.LazyDoublePerlinNoiseSampler;
+import nl.kallestruik.noisesampler.minecraft.noise.SimplexNoiseSampler;
 import nl.kallestruik.noisesampler.minecraft.util.MathHelper;
 import nl.kallestruik.noisesampler.minecraft.util.NoiseValuePoint;
 import nl.kallestruik.noisesampler.minecraft.util.TerrainNoisePoint;
@@ -15,6 +16,7 @@ import nl.kallestruik.noisesampler.minecraft.noise.InterpolatedNoiseSampler;
 
 public class NoiseColumnSampler {
     public final GenerationShapeConfig config;
+    public final SimplexNoiseSampler islandNoise;
     public final InterpolatedNoiseSampler terrainNoise;
     private final LazyDoublePerlinNoiseSampler temperatureNoise;
     private final LazyDoublePerlinNoiseSampler humidityNoise;
@@ -49,7 +51,13 @@ public class NoiseColumnSampler {
         this.config = config;
         boolean isLargeBiomes = config.largeBiomes();
         Xoroshiro128PlusPlusRandom.RandomDeriver randomDeriver = new Xoroshiro128PlusPlusRandom(seed).createRandomDeriver();
-
+        if (config.islandNoiseOverride()) {
+            Xoroshiro128PlusPlusRandom lv = new Xoroshiro128PlusPlusRandom(seed);
+            lv.skip(17292);
+            this.islandNoise = new SimplexNoiseSampler(lv);
+        } else {
+            this.islandNoise = null;
+        }
         this.terrainNoise = new InterpolatedNoiseSampler(randomDeriver.createRandom("minecraft:terrain") , config.horizontalBlockSize(), config.verticalBlockSize());
         this.temperatureNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, isLargeBiomes ? NoiseParameterKey.TEMPERATURE_LARGE : NoiseParameterKey.TEMPERATURE);
         this.humidityNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, isLargeBiomes ? NoiseParameterKey.VEGETATION_LARGE : NoiseParameterKey.VEGETATION);

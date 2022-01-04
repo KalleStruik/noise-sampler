@@ -2,7 +2,10 @@ package nl.kallestruik.noisesampler;
 
 import java.util.HashMap;
 import java.util.Map;
+import nl.kallestruik.noisesampler.minecraft.Dimension;
+import nl.kallestruik.noisesampler.minecraft.util.NoiseSamplingConfig;
 import nl.kallestruik.noisesampler.minecraft.util.NoiseValuePoint;
+import nl.kallestruik.noisesampler.minecraft.util.SlideConfig;
 import nl.kallestruik.noisesampler.minecraft.util.TerrainNoisePoint;
 //import nl.kallestruik.noisesampler.minecraft.ChunkRandom;
 import nl.kallestruik.noisesampler.minecraft.GenerationShapeConfig;
@@ -12,15 +15,46 @@ import nl.kallestruik.noisesampler.minecraft.VanillaTerrainParameters;
 import nl.kallestruik.noisesampler.minecraft.util.Util;
 
 public class NoiseSampler {
-    private static final GenerationShapeConfig config = new GenerationShapeConfig(-64, 384,
-            1, 2, false, false, false,
-            VanillaTerrainParameters.createSurfaceParameters()
-        );
+    private static final GenerationShapeConfig overworldConfig = new GenerationShapeConfig(-64, 384,
+        new NoiseSamplingConfig(1.0, 1.0, 80.0, 160.0),
+        new SlideConfig(-0.078125, 2, 8),
+        new SlideConfig(0.1171875, 3, 0),
+        1, 2, false, false, false,
+        VanillaTerrainParameters.createSurfaceParameters());
+
+    private static final GenerationShapeConfig netherConfig = new GenerationShapeConfig(0, 128,
+        new NoiseSamplingConfig(1.0, 3.0, 80.0, 60.0),
+        new SlideConfig(0.9375, 3, 0),
+        new SlideConfig(2.5, 4, -1),
+        1, 2, false, false, false,
+        VanillaTerrainParameters.createNetherParameters());
+
+    private static final GenerationShapeConfig endConfig = new GenerationShapeConfig(0, 128,
+        new NoiseSamplingConfig(2.0, 1.0, 80.0, 160.0),
+        new SlideConfig(-23.4375, 64, -46),
+        new SlideConfig(-0.234375, 7, 1),
+        2, 1, true, false, false,
+        VanillaTerrainParameters.createEndParameters());
+
+
     private NoiseColumnSampler noiseColumnSampler;
 
-    public NoiseSampler(long seed) {
+    public NoiseSampler(long seed, Dimension dimension) {
         NoiseRegistry noiseRegistry = new NoiseRegistry();
-        noiseColumnSampler = new NoiseColumnSampler(config, seed, noiseRegistry);
+        switch(dimension){
+            case OVERWORLD:
+                noiseColumnSampler = new NoiseColumnSampler(overworldConfig, seed, noiseRegistry);
+                break;
+            case NETHER:
+                noiseColumnSampler = new NoiseColumnSampler(netherConfig, seed, noiseRegistry);
+                break;
+            case THEEND:
+                noiseColumnSampler = new NoiseColumnSampler(endConfig, seed, noiseRegistry);
+        }
+    }
+
+    public Map<NoiseType, Double> queryNoiseFromBlockPos(int x, int y, int z, NoiseType... noiseTypes){
+        return queryNoise(x>>2, y, z>>2, noiseTypes);
     }
 
     public Map<NoiseType, Double> queryNoise(int x, int y, int z, NoiseType... noiseTypes) {
@@ -41,7 +75,7 @@ public class NoiseSampler {
         return noises;
     }
 
-    public double sampleNoise(NoiseValuePoint noiseValuePoint, TerrainNoisePoint terrainNoisePoint, NoiseType type, int x, int y, int z) {
+        public double sampleNoise(NoiseValuePoint noiseValuePoint, TerrainNoisePoint terrainNoisePoint, NoiseType type, int x, int y, int z) {
         switch (type) {
             case TEMPERATURE -> {
                 return (float)noiseValuePoint.temperatureNoise() / 10000.0f;
@@ -74,8 +108,7 @@ public class NoiseSampler {
                 return noiseColumnSampler.terrainNoise.calculateNoise(x, y, z);
             }
             case ISLAND -> {
-                // This is never enabled because of the generation shape config defined above. Therefore, we always return 0.
-                return 0;
+                return noiseColumnSampler.islandNoise == null ? 0 : noiseColumnSampler.islandNoise.sample(x, y, z);
             }
             case JAGGED -> {
                 return noiseColumnSampler.sampleJaggedNoise(terrainNoisePoint.peaks(), x, z);
@@ -175,5 +208,9 @@ public class NoiseSampler {
             }
             default -> throw new IllegalArgumentException("Unknown noise type: " + type.name());
         }
+    }
+
+    public NoiseColumnSampler getNoiseColumnSampler() {
+        return noiseColumnSampler;
     }
 }
