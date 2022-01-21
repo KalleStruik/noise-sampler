@@ -8,7 +8,7 @@ maven {url "https://jitpack.io"}
 
 and the following to your build.gradle dependencies block:
 ```
-implementation 'com.github.KalleStruik:noise-sampler:-SNAPSHOT'
+implementation 'com.github.KalleStruik:noise-sampler:master-SNAPSHOT'
 ```
 
 ## Credits
