@@ -3,7 +3,7 @@
 
 Add the following to your build.gradle repositories block
 ```
-maven {url "https://jitpack.io"}
+maven {url "https://repo.jellejurre.dev"}
 ```
 
 and the following to your build.gradle dependencies block:
