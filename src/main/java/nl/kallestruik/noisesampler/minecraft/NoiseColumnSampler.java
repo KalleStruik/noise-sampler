@@ -1,92 +1,103 @@
-/*
- * Decompiled with CFR 0.0.9 (FabricMC cc05e23f).
- * 
- * Could not load the following classes:
- *  org.jetbrains.annotations.Nullable
- */
 package nl.kallestruik.noisesampler.minecraft;
 
+import nl.kallestruik.noisesampler.minecraft.noise.Constant;
+import nl.kallestruik.noisesampler.minecraft.noise.DoublePerlinNoiseSampler;
+import nl.kallestruik.noisesampler.minecraft.noise.InterpolatedNoiseSampler;
 import nl.kallestruik.noisesampler.minecraft.noise.LazyDoublePerlinNoiseSampler;
+import nl.kallestruik.noisesampler.minecraft.noise.NoiseSampler;
+import nl.kallestruik.noisesampler.minecraft.noise.ShiftA;
+import nl.kallestruik.noisesampler.minecraft.noise.ShiftB;
+import nl.kallestruik.noisesampler.minecraft.noise.ShiftedNoise;
 import nl.kallestruik.noisesampler.minecraft.noise.SimplexNoiseSampler;
 import nl.kallestruik.noisesampler.minecraft.util.MathHelper;
 import nl.kallestruik.noisesampler.minecraft.util.NoiseValuePoint;
 import nl.kallestruik.noisesampler.minecraft.util.TerrainNoisePoint;
 import nl.kallestruik.noisesampler.minecraft.util.Util;
-import nl.kallestruik.noisesampler.minecraft.noise.InterpolatedNoiseSampler;
 
 public class NoiseColumnSampler {
     public final GenerationShapeConfig config;
     public final SimplexNoiseSampler islandNoise;
     public final InterpolatedNoiseSampler terrainNoise;
-    private final LazyDoublePerlinNoiseSampler temperatureNoise;
-    private final LazyDoublePerlinNoiseSampler humidityNoise;
-    private final LazyDoublePerlinNoiseSampler continentalnessNoise;
-    private final LazyDoublePerlinNoiseSampler erosionNoise;
-    private final LazyDoublePerlinNoiseSampler weirdnessNoise;
-    private final LazyDoublePerlinNoiseSampler jaggedNoise;
-    public final LazyDoublePerlinNoiseSampler aquiferBarrierNoise;
-    public final LazyDoublePerlinNoiseSampler aquiferFluidLevelFloodednessNoise;
-    public final LazyDoublePerlinNoiseSampler aquiferFluidLevelSpreadNoise;
-    public final LazyDoublePerlinNoiseSampler aquiferLavaNoise;
-    private final LazyDoublePerlinNoiseSampler caveLayerNoise;
-    private final LazyDoublePerlinNoiseSampler pillarNoise;
-    public final LazyDoublePerlinNoiseSampler pillarRarenessNoise;
-    public final LazyDoublePerlinNoiseSampler pillarThicknessNoise;
-    private final LazyDoublePerlinNoiseSampler spaghetti2dNoise;
-    public final LazyDoublePerlinNoiseSampler spaghetti2dElevationNoise;
-    public final LazyDoublePerlinNoiseSampler spaghetti2dModulatorNoise;
-    public final LazyDoublePerlinNoiseSampler spaghetti2dThicknessNoise;
-    public final LazyDoublePerlinNoiseSampler spaghetti3dFirstNoise;
-    public final LazyDoublePerlinNoiseSampler spaghetti3dSecondNoise;
-    public final LazyDoublePerlinNoiseSampler spaghetti3dRarityNoise;
-    public final LazyDoublePerlinNoiseSampler spaghetti3dThicknessNoise;
-    private final LazyDoublePerlinNoiseSampler spaghettiRoughnessNoise;
-    public final LazyDoublePerlinNoiseSampler spaghettiRoughnessModulatorNoise;
-    private final LazyDoublePerlinNoiseSampler caveEntranceNoise;
-    public final LazyDoublePerlinNoiseSampler caveCheeseNoise;
-    private final LazyDoublePerlinNoiseSampler shiftNoise;
-    public final LazyDoublePerlinNoiseSampler oreGapNoise;
-
-    public NoiseColumnSampler(GenerationShapeConfig config, long seed, NoiseRegistry noiseRegistry) {
+    private final NoiseSampler temperatureNoise;
+    private final NoiseSampler humidityNoise;
+    private final NoiseSampler continentalnessNoise;
+    private final NoiseSampler erosionNoise;
+    private final NoiseSampler weirdnessNoise;
+    private final NoiseSampler jaggedNoise;
+    public final NoiseSampler aquiferBarrierNoise;
+    public final NoiseSampler aquiferFluidLevelFloodednessNoise;
+    public final NoiseSampler aquiferFluidLevelSpreadNoise;
+    public final NoiseSampler aquiferLavaNoise;
+    private final NoiseSampler caveLayerNoise;
+    private final NoiseSampler pillarNoise;
+    public final NoiseSampler pillarRarenessNoise;
+    public final NoiseSampler pillarThicknessNoise;
+    private final NoiseSampler spaghetti2dNoise;
+    public final NoiseSampler spaghetti2dElevationNoise;
+    public final NoiseSampler spaghetti2dModulatorNoise;
+    public final NoiseSampler spaghetti2dThicknessNoise;
+    public final NoiseSampler spaghetti3dFirstNoise;
+    public final NoiseSampler spaghetti3dSecondNoise;
+    public final NoiseSampler spaghetti3dRarityNoise;
+    public final NoiseSampler spaghetti3dThicknessNoise;
+    private final NoiseSampler spaghettiRoughnessNoise;
+    public final NoiseSampler spaghettiRoughnessModulatorNoise;
+    private final NoiseSampler caveEntranceNoise;
+    public final NoiseSampler caveCheeseNoise;
+    private final NoiseSampler shiftNoise;
+    public final NoiseSampler oreGapNoise;
+    public final Dimension dimension;
+    public NoiseColumnSampler(GenerationShapeConfig config, long seed, Dimension dimension) {
+        this.dimension = dimension;
         this.config = config;
         boolean isLargeBiomes = config.largeBiomes();
-        Xoroshiro128PlusPlusRandom.RandomDeriver randomDeriver = new Xoroshiro128PlusPlusRandom(seed).createRandomDeriver();
+        Xoroshiro128PlusPlusRandom randomDeriver = new Xoroshiro128PlusPlusRandom(seed).createRandomDeriver();
         if (config.islandNoiseOverride()) {
-            Xoroshiro128PlusPlusRandom lv = new Xoroshiro128PlusPlusRandom(seed);
-            lv.skip(17292);
-            this.islandNoise = new SimplexNoiseSampler(lv);
+            RandomSource randomsource = new LegacyRandomSource(seed);
+            randomsource.consumeCount(17292);
+            this.islandNoise = new SimplexNoiseSampler(randomsource);
         } else {
             this.islandNoise = null;
         }
+        this.shiftNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.OFFSET);
         this.terrainNoise = new InterpolatedNoiseSampler(randomDeriver.createRandom("minecraft:terrain") , config.horizontalBlockSize(), config.verticalBlockSize());
-        this.temperatureNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, isLargeBiomes ? NoiseParameterKey.TEMPERATURE_LARGE : NoiseParameterKey.TEMPERATURE);
-        this.humidityNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, isLargeBiomes ? NoiseParameterKey.VEGETATION_LARGE : NoiseParameterKey.VEGETATION);
-        this.shiftNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.OFFSET);
-        this.aquiferBarrierNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.AQUIFER_BARRIER);
-        this.aquiferFluidLevelFloodednessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.AQUIFER_FLUID_LEVEL_FLOODEDNESS);
-        this.aquiferLavaNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.AQUIFER_LAVA);
-        this.aquiferFluidLevelSpreadNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.AQUIFER_FLUID_LEVEL_SPREAD);
-        this.pillarNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.PILLAR);
-        this.pillarRarenessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.PILLAR_RARENESS);
-        this.pillarThicknessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.PILLAR_THICKNESS);
-        this.spaghetti2dNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.SPAGHETTI_2D);
-        this.spaghetti2dElevationNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.SPAGHETTI_2D_ELEVATION);
-        this.spaghetti2dModulatorNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.SPAGHETTI_2D_MODULATOR);
-        this.spaghetti2dThicknessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.SPAGHETTI_2D_THICKNESS);
-        this.spaghetti3dFirstNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.SPAGHETTI_3D_1);
-        this.spaghetti3dSecondNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.SPAGHETTI_3D_2);
-        this.spaghetti3dRarityNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.SPAGHETTI_3D_RARITY);
-        this.spaghetti3dThicknessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.SPAGHETTI_3D_THICKNESS);
-        this.spaghettiRoughnessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.SPAGHETTI_ROUGHNESS);
-        this.spaghettiRoughnessModulatorNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.SPAGHETTI_ROUGHNESS_MODULATOR);
-        this.caveEntranceNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.CAVE_ENTRANCE);
-        this.caveLayerNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.CAVE_LAYER);
-        this.caveCheeseNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.CAVE_CHEESE);
-        this.continentalnessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, isLargeBiomes ? NoiseParameterKey.CONTINENTALNESS_LARGE : NoiseParameterKey.CONTINENTALNESS);
-        this.erosionNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, isLargeBiomes ? NoiseParameterKey.EROSION_LARGE : NoiseParameterKey.EROSION);
-        this.weirdnessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.RIDGE);
-        this.oreGapNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.ORE_GAP);
-        this.jaggedNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(noiseRegistry, randomDeriver, NoiseParameterKey.JAGGED);
+        if (dimension == Dimension.NETHER){
+            NoiseSampler densityfunction = new ShiftA(LazyDoublePerlinNoiseSampler.create(randomDeriver, NoiseParameterKey.OFFSET.value, new DoublePerlinNoiseSampler.NoiseParameters(0, 0)));
+            NoiseSampler densityfunction1 = new ShiftB(LazyDoublePerlinNoiseSampler.create(randomDeriver, NoiseParameterKey.OFFSET.value, new DoublePerlinNoiseSampler.NoiseParameters(0, 0)));
+            this.temperatureNoise = ShiftedNoise.shiftedNoise2d(densityfunction, densityfunction1, 0.25D, LazyDoublePerlinNoiseSampler.createNoiseSampler(new LegacyRandomSource(seed), NoiseParameterKey.TEMPERATURE, true));
+            this.humidityNoise = ShiftedNoise.shiftedNoise2d(densityfunction, densityfunction1, 0.25D, LazyDoublePerlinNoiseSampler.createNoiseSampler(new LegacyRandomSource(seed + 1), NoiseParameterKey.VEGETATION, true));
+            this.continentalnessNoise = new Constant(0);
+            this.erosionNoise = new Constant(0);
+            this.weirdnessNoise = new Constant(0);
+        } else {
+            this.temperatureNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, isLargeBiomes ? NoiseParameterKey.TEMPERATURE_LARGE : NoiseParameterKey.TEMPERATURE);
+            this.humidityNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, isLargeBiomes ? NoiseParameterKey.VEGETATION_LARGE : NoiseParameterKey.VEGETATION);
+            this.continentalnessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, isLargeBiomes ? NoiseParameterKey.CONTINENTALNESS_LARGE : NoiseParameterKey.CONTINENTALNESS);
+            this.erosionNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, isLargeBiomes ? NoiseParameterKey.EROSION_LARGE : NoiseParameterKey.EROSION);
+            this.weirdnessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.RIDGE);
+        }
+        this.aquiferBarrierNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.AQUIFER_BARRIER);
+        this.aquiferFluidLevelFloodednessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.AQUIFER_FLUID_LEVEL_FLOODEDNESS);
+        this.aquiferLavaNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.AQUIFER_LAVA);
+        this.aquiferFluidLevelSpreadNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.AQUIFER_FLUID_LEVEL_SPREAD);
+        this.pillarNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.PILLAR);
+        this.pillarRarenessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.PILLAR_RARENESS);
+        this.pillarThicknessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.PILLAR_THICKNESS);
+        this.spaghetti2dNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.SPAGHETTI_2D);
+        this.spaghetti2dElevationNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.SPAGHETTI_2D_ELEVATION);
+        this.spaghetti2dModulatorNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.SPAGHETTI_2D_MODULATOR);
+        this.spaghetti2dThicknessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.SPAGHETTI_2D_THICKNESS);
+        this.spaghetti3dFirstNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.SPAGHETTI_3D_1);
+        this.spaghetti3dSecondNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.SPAGHETTI_3D_2);
+        this.spaghetti3dRarityNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.SPAGHETTI_3D_RARITY);
+        this.spaghetti3dThicknessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.SPAGHETTI_3D_THICKNESS);
+        this.spaghettiRoughnessNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.SPAGHETTI_ROUGHNESS);
+        this.spaghettiRoughnessModulatorNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.SPAGHETTI_ROUGHNESS_MODULATOR);
+        this.caveEntranceNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.CAVE_ENTRANCE);
+        this.caveLayerNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.CAVE_LAYER);
+        this.caveCheeseNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.CAVE_CHEESE);
+        this.oreGapNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.ORE_GAP);
+        this.jaggedNoise = LazyDoublePerlinNoiseSampler.createNoiseSampler(randomDeriver, NoiseParameterKey.JAGGED);
     }
 
     public NoiseValuePoint sample(int x, int y, int z) {
@@ -99,19 +110,26 @@ public class NoiseColumnSampler {
         double f = this.sampleContinentalnessNoise(d, 0.0, e);
         double g = this.sampleWeirdnessNoise(d, 0.0, e);
         double h = this.sampleErosionNoise(d, 0.0, e);
-        TerrainNoisePoint lv = this.createTerrainNoisePoint(Util.toBlock(x), Util.toBlock(z), (float)f, (float)g, (float)h);
+        TerrainNoisePoint lv = this.createTerrainNoisePoint((float)f, (float)g, (float)h);
         return new NoiseInfo(d, e, f, g, h, lv);
     }
 
     public NoiseValuePoint createNoisePoint(int x, int y, int z, NoiseInfo arg) {
-        double d = arg.shiftedX();
-        double e = (double)y + this.sampleShiftNoise(y, z, x);
-        double f = arg.shiftedZ();
-        double g = this.method_39331(Util.toBlock(y), arg.terrainInfo());
-        return NoiseValuePoint.createNoiseValuePoint((float)this.sampleTemperatureNoise(d, e, f), (float)this.sampleHumidityNoise(d, e, f), (float)arg.continentalness(), (float)arg.erosion(), (float)g, (float)arg.weirdness());
+        double d, f, g;
+        if (dimension == Dimension.NETHER){
+            d = x << 2;
+            f = z << 2;
+            g = 0;
+        } else {
+            d = arg.shiftedX();
+            f = arg.shiftedZ();
+            g = this.method_39331(Util.toBlock(y), arg.terrainInfo());
+        }
+
+        return NoiseValuePoint.createNoiseValuePoint((float)this.sampleTemperatureNoise(d, f), (float)this.sampleHumidityNoise(d, f), (float)arg.continentalness(), (float)arg.erosion(), (float)g, (float)arg.weirdness());
     }
 
-    private double sampleHumidityNoise(double x, double y, double z) {
+    private double sampleHumidityNoise(double x, double z) {
         return this.humidityNoise.sample(x, 0.0, z);
     }
 
@@ -127,7 +145,7 @@ public class NoiseColumnSampler {
         return this.weirdnessNoise.sample(x, y, z);
     }
 
-    private double sampleTemperatureNoise(double x, double y, double z) {
+    private double sampleTemperatureNoise(double x, double z) {
         return this.temperatureNoise.sample(x, 0.0, z);
     }
 
@@ -144,7 +162,7 @@ public class NoiseColumnSampler {
         return h > 0.0 ? d * h : d / 2.0 * h;
     }
 
-    public TerrainNoisePoint createTerrainNoisePoint(int x, int z, float continentalness, float weirdness, float erosion) {
+    public TerrainNoisePoint createTerrainNoisePoint(float continentalness, float weirdness, float erosion) {
         VanillaTerrainParameters parameters = this.config.terrainParameters();
         VanillaTerrainParameters.NoisePoint noisePoint = parameters.createNoisePoint(continentalness, erosion, weirdness);
         float k = parameters.getOffset(noisePoint);
@@ -212,15 +230,14 @@ public class NoiseColumnSampler {
         return MathHelper.clamp(value, -1.0, 1.0);
     }
 
-    public static double sample(LazyDoublePerlinNoiseSampler sampler, double x, double y, double z, double invertedScale) {
+    public static double sample(NoiseSampler sampler, double x, double y, double z, double invertedScale) {
         return sampler.sample(x / invertedScale, y / invertedScale, z / invertedScale);
     }
 
     public record NoiseInfo(double shiftedX, double shiftedZ, double continentalness, double weirdness, double erosion, TerrainNoisePoint terrainInfo) {}
 
     public static final class CaveScaler {
-        private CaveScaler() {
-        }
+        private CaveScaler() {}
 
         static double scaleCaves(double value) {
             if (value < -0.75) {
@@ -252,4 +269,3 @@ public class NoiseColumnSampler {
         }
     }
 }
-

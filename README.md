@@ -1,6 +1,8 @@
 # Noise sampler
 ## Install Instructions
 
+This version is for Minecraft 1.20.0+
+
 Add the following to your build.gradle repositories block
 ```
 maven {url "https://repo.jellejurre.dev"}
@@ -8,7 +10,7 @@ maven {url "https://repo.jellejurre.dev"}
 
 and the following to your build.gradle dependencies block:
 ```
-implementation 'com.github.KalleStruik:noise-sampler:1.0.0'
+implementation 'com.github.KalleStruik:noise-sampler:1.20.0'
 ```
 
 ## Credits

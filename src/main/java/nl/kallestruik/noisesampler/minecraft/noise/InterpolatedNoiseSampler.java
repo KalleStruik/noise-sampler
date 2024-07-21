@@ -1,11 +1,8 @@
-/*
- * Decompiled with CFR 0.0.9 (FabricMC cc05e23f).
- */
 package nl.kallestruik.noisesampler.minecraft.noise;
 
 import java.util.stream.IntStream;
-import nl.kallestruik.noisesampler.minecraft.util.MathHelper;
 import nl.kallestruik.noisesampler.minecraft.Xoroshiro128PlusPlusRandom;
+import nl.kallestruik.noisesampler.minecraft.util.MathHelper;
 
 public class InterpolatedNoiseSampler {
     private final OctavePerlinNoiseSampler lowerInterpolatedNoise;
@@ -41,7 +38,6 @@ public class InterpolatedNoiseSampler {
         double d = 0.0;
         double e = 0.0;
         double f = 0.0;
-        boolean bl = true;
         double g = 1.0;
         for (int o = 0; o < 8; ++o) {
             PerlinNoiseSampler lv = this.interpolationNoise.getOctave(o);
@@ -71,4 +67,3 @@ public class InterpolatedNoiseSampler {
         return MathHelper.clampedLerp(d / 512.0, e / 512.0, o) / 128.0;
     }
 }
-

@@ -7,7 +7,6 @@ import nl.kallestruik.noisesampler.minecraft.util.NoiseSamplingConfig;
 import nl.kallestruik.noisesampler.minecraft.util.NoiseValuePoint;
 import nl.kallestruik.noisesampler.minecraft.util.SlideConfig;
 import nl.kallestruik.noisesampler.minecraft.util.TerrainNoisePoint;
-//import nl.kallestruik.noisesampler.minecraft.ChunkRandom;
 import nl.kallestruik.noisesampler.minecraft.GenerationShapeConfig;
 import nl.kallestruik.noisesampler.minecraft.NoiseColumnSampler;
 import nl.kallestruik.noisesampler.minecraft.NoiseRegistry;
@@ -40,16 +39,15 @@ public class NoiseSampler {
     private NoiseColumnSampler noiseColumnSampler;
 
     public NoiseSampler(long seed, Dimension dimension) {
-        NoiseRegistry noiseRegistry = new NoiseRegistry();
         switch(dimension){
             case OVERWORLD:
-                noiseColumnSampler = new NoiseColumnSampler(overworldConfig, seed, noiseRegistry);
+                noiseColumnSampler = new NoiseColumnSampler(overworldConfig, seed, dimension);
                 break;
             case NETHER:
-                noiseColumnSampler = new NoiseColumnSampler(netherConfig, seed, noiseRegistry);
+                noiseColumnSampler = new NoiseColumnSampler(netherConfig, seed, dimension);
                 break;
             case THEEND:
-                noiseColumnSampler = new NoiseColumnSampler(endConfig, seed, noiseRegistry);
+                noiseColumnSampler = new NoiseColumnSampler(endConfig, seed, dimension);
         }
     }
 
@@ -60,8 +58,6 @@ public class NoiseSampler {
     public Map<NoiseType, Double> queryNoise(int x, int y, int z, NoiseType... noiseTypes) {
         NoiseValuePoint noiseValuePoint = noiseColumnSampler.sample(x, y, z);
         TerrainNoisePoint terrainNoisePoint = noiseColumnSampler.createTerrainNoisePoint(
-                x,
-                z,
                 noiseValuePoint.continentalnessNoise() / 10000.0f,
                 noiseValuePoint.weirdnessNoise() / 10000.0f,
                 noiseValuePoint.erosionNoise() / 10000.0f

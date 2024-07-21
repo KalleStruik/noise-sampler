@@ -1,19 +1,16 @@
-/*
- * Decompiled with CFR 0.0.9 (FabricMC cc05e23f).
- */
 package nl.kallestruik.noisesampler.minecraft.noise;
 
+import nl.kallestruik.noisesampler.minecraft.BitRandomSource;
 import nl.kallestruik.noisesampler.minecraft.util.MathHelper;
-import nl.kallestruik.noisesampler.minecraft.Xoroshiro128PlusPlusRandom;
 
 public final class PerlinNoiseSampler {
-    protected static final int[][] GRADIENTS = new int[][]{{1, 1, 0}, {-1, 1, 0}, {1, -1, 0}, {-1, -1, 0}, {1, 0, 1}, {-1, 0, 1}, {1, 0, -1}, {-1, 0, -1}, {0, 1, 1}, {0, -1, 1}, {0, 1, -1}, {0, -1, -1}, {1, 1, 0}, {0, -1, 1}, {-1, 1, 0}, {0, -1, -1}};
+    private static final int[][] GRADIENTS = new int[][]{{1, 1, 0}, {-1, 1, 0}, {1, -1, 0}, {-1, -1, 0}, {1, 0, 1}, {-1, 0, 1}, {1, 0, -1}, {-1, 0, -1}, {0, 1, 1}, {0, -1, 1}, {0, 1, -1}, {0, -1, -1}, {1, 1, 0}, {0, -1, 1}, {-1, 1, 0}, {0, -1, -1}};
     private final byte[] permutations;
     public final double originX;
     public final double originY;
     public final double originZ;
 
-    public PerlinNoiseSampler(Xoroshiro128PlusPlusRandom random) {
+    public PerlinNoiseSampler(BitRandomSource random) {
         int i;
         this.originX = random.nextDouble() * 256.0;
         this.originY = random.nextDouble() * 256.0;
@@ -30,7 +27,6 @@ public final class PerlinNoiseSampler {
         }
     }
 
-    @Deprecated
     public double sample(double x, double y, double z, double yScale, double yMax) {
         double s;
         double i = x + this.originX;
@@ -80,8 +76,7 @@ public final class PerlinNoiseSampler {
         return MathHelper.lerp3(y, z, aa, h, r, s, t, u, v, w, x);
     }
 
-    protected static double dot(int[] gArr, double x, double y, double z) {
+    private static double dot(int[] gArr, double x, double y, double z) {
         return (double)gArr[0] * x + (double)gArr[1] * y + (double)gArr[2] * z;
     }
 }
-

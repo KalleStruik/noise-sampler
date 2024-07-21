@@ -1,13 +1,6 @@
-/*
- * Decompiled with CFR 0.0.9 (FabricMC cc05e23f).
- * 
- * Could not load the following classes:
- *  org.jetbrains.annotations.Nullable
- */
 package nl.kallestruik.noisesampler.minecraft.noise;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.SortedSet;
@@ -15,9 +8,10 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
+import nl.kallestruik.noisesampler.minecraft.BitRandomSource;
+import nl.kallestruik.noisesampler.minecraft.Xoroshiro128PlusPlusRandom;
 import nl.kallestruik.noisesampler.minecraft.util.MathHelper;
 import nl.kallestruik.noisesampler.minecraft.util.Pair;
-import nl.kallestruik.noisesampler.minecraft.Xoroshiro128PlusPlusRandom;
 
 public class OctavePerlinNoiseSampler {
     private final PerlinNoiseSampler[] octaveSamplers;
@@ -26,51 +20,45 @@ public class OctavePerlinNoiseSampler {
     private final double persistence;
     private final double lacunarity;
 
-    @Deprecated
     public static OctavePerlinNoiseSampler createLegacy(Xoroshiro128PlusPlusRandom random, IntStream intStream) {
         return new OctavePerlinNoiseSampler(random, OctavePerlinNoiseSampler.calculateAmplitudes(new TreeSet<>(intStream.boxed().collect(Collectors.toList()))), false);
     }
 
-    public static OctavePerlinNoiseSampler create(Xoroshiro128PlusPlusRandom random, int offset, List<Double> amplitudes) {
-        return new OctavePerlinNoiseSampler(random, Pair.of(offset, amplitudes), true);
+    public static OctavePerlinNoiseSampler createLegacyForLegacyNetherBiome(
+        BitRandomSource p_230526_, int p_230527_, List<Double> p_230528_) {
+        return new OctavePerlinNoiseSampler(p_230526_, new Pair<>(p_230527_, p_230528_), false);
+    }
+
+    public static OctavePerlinNoiseSampler create(BitRandomSource random, int offset, List<Double> amplitudes) {
+        return new OctavePerlinNoiseSampler(random, new Pair<>(offset, amplitudes), true);
     }
 
     private static Pair<Integer, List<Double>> calculateAmplitudes(SortedSet<Integer> octaves) {
-        int j;
-        if (octaves.isEmpty()) {
-            throw new IllegalArgumentException("Need some octaves!");
-        }
         int i = -octaves.first();
-        int k = i + (j = octaves.last()) + 1;
-        if (k < 1) {
-            throw new IllegalArgumentException("Total number of octaves needs to be >= 1");
-        }
+        int k = i + octaves.last() + 1;
         List<Double> doubleList = DoubleStream.of(new double[k]).boxed().collect(Collectors.toList());
-        Iterator<Integer> intBidirectionalIterator = octaves.iterator();
-        while (intBidirectionalIterator.hasNext()) {
-            int l = intBidirectionalIterator.next();
+        for (int l : octaves) {
             doubleList.set(l + i, 1.0);
         }
-        return Pair.of(-i, doubleList);
+        return new Pair<>(-i, doubleList);
     }
 
-    protected OctavePerlinNoiseSampler(Xoroshiro128PlusPlusRandom random, Pair<Integer, List<Double>> pair, boolean xoroshiro) {
+    protected OctavePerlinNoiseSampler(BitRandomSource random, Pair<Integer, List<Double>> pair, boolean xoroshiro) {
         this.firstOctave = pair.getLeft();
         this.amplitudes = pair.getRight();
         int i = this.amplitudes.size();
         int j = -this.firstOctave;
         this.octaveSamplers = new PerlinNoiseSampler[i];
         if (xoroshiro) {
-            Xoroshiro128PlusPlusRandom.RandomDeriver lv = random.createRandomDeriver();
+            Xoroshiro128PlusPlusRandom lv = ((Xoroshiro128PlusPlusRandom) random).createRandomDeriver();
             for (int k = 0; k < i; ++k) {
                 if (this.amplitudes.get(k) == 0.0) continue;
                 int l = this.firstOctave + k;
                 this.octaveSamplers[k] = new PerlinNoiseSampler(lv.createRandom("octave_" + l));
             }
         } else {
-            double k;
             PerlinNoiseSampler lv = new PerlinNoiseSampler(random);
-            if (j >= 0 && j < i && (k = this.amplitudes.get(j)) != 0.0) {
+            if (j >= 0 && j < i && this.amplitudes.get(j) != 0.0) {
                 this.octaveSamplers[j] = lv;
             }
             for (int k2 = j - 1; k2 >= 0; --k2) {
@@ -80,10 +68,10 @@ public class OctavePerlinNoiseSampler {
                         this.octaveSamplers[k2] = new PerlinNoiseSampler(random);
                         continue;
                     }
-                    OctavePerlinNoiseSampler.skipCalls(random);
+                    random.consumeCount(262);
                     continue;
                 }
-                OctavePerlinNoiseSampler.skipCalls(random);
+                random.consumeCount(262);
             }
             if (Arrays.stream(this.octaveSamplers).filter(Objects::nonNull).count() != this.amplitudes.stream().filter(double_ -> double_ != 0.0).count()) {
                 throw new IllegalStateException("Failed to create correct number of noise levels for given non-zero amplitudes");
@@ -96,15 +84,14 @@ public class OctavePerlinNoiseSampler {
         this.persistence = Math.pow(2.0, i - 1) / (Math.pow(2.0, i) - 1.0);
     }
 
-    private static void skipCalls(Xoroshiro128PlusPlusRandom random) {
-        random.skip(262);
+    private static void skipCalls(BitRandomSource random) {
+        random.consumeCount(262);
     }
 
     public double sample(double x, double y, double z) {
         return this.sample(x, y, z, 0.0, 0.0, false);
     }
 
-    @Deprecated
     public double sample(double x, double y, double z, double yScale, double yMax, boolean useOrigin) {
         double i = 0.0;
         double j = this.lacunarity;
@@ -126,7 +113,6 @@ public class OctavePerlinNoiseSampler {
     }
 
     public static double maintainPrecision(double value) {
-        return value - (double)MathHelper.lfloor(value / 3.3554432E7 + 0.5) * 3.3554432E7;
+        return value - (double) MathHelper.lfloor(value / 3.3554432E7 + 0.5) * 3.3554432E7;
     }
 }
-

@@ -1,6 +1,6 @@
 package nl.kallestruik.noisesampler.minecraft.noise;
 
-import nl.kallestruik.noisesampler.minecraft.Xoroshiro128PlusPlusRandom;
+import nl.kallestruik.noisesampler.minecraft.SimplexNoiseRandom;
 import nl.kallestruik.noisesampler.minecraft.util.MathHelper;
 
 public class SimplexNoiseSampler {
@@ -13,7 +13,7 @@ public class SimplexNoiseSampler {
     public final double originY;
     public final double originZ;
 
-    public SimplexNoiseSampler(Xoroshiro128PlusPlusRandom random) {
+    public SimplexNoiseSampler(SimplexNoiseRandom random) {
         int i;
         this.originX = random.nextDouble() * 256.0;
         this.originY = random.nextDouble() * 256.0;
@@ -52,7 +52,6 @@ public class SimplexNoiseSampler {
     public double sample(double x, double y) {
         int o;
         int n;
-        double k;
         double m;
         int j;
         double g;
@@ -60,7 +59,7 @@ public class SimplexNoiseSampler {
         int i = MathHelper.floor(x + f);
         double h = (double)i - (g = (double)(i + (j = MathHelper.floor(y + f))) * UNSKEW_FACTOR_2D);
         double l = x - h;
-        if (l > (m = y - (k = (double)j - g))) {
+        if (l > (m = y - ((double)j - g))) {
             n = 1;
             o = 0;
         } else {
@@ -89,12 +88,10 @@ public class SimplexNoiseSampler {
         int v;
         int u;
         int t;
-        double g = 0.3333333333333333;
         double h = (x + y + z) * 0.3333333333333333;
         int i = MathHelper.floor(x + h);
         int j = MathHelper.floor(y + h);
         int k = MathHelper.floor(z + h);
-        double l = 0.16666666666666666;
         double m = (double)(i + j + k) * 0.16666666666666666;
         double n = (double)i - m;
         double o = (double)j - m;
@@ -170,5 +167,3 @@ public class SimplexNoiseSampler {
         return 32.0 * (ap + aq + ar + as);
     }
 }
-
-
